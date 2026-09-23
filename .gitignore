@@ -1,0 +1,16 @@
+.venv/
+evyz.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.DS_Store
+.env
+
+# Wearable datasets and generated analysis stay local.
+data/raw/**
+data/processed/**
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/README.md

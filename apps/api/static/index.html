@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EVYZ</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #e7e5e4;
+      --paper: #fafaf9;
+      --card: #ffffff;
+      --accent: #9a3412;
+      --steady: #365314;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", Palatino, Georgia, serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    main {
+      max-width: 36rem;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+    header p, .detail, .note, .timeline li span, .event-list li {
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+    }
+    h1 { font-size: 1.75rem; font-weight: 600; margin: 0 0 0.25rem; }
+    h2 { font-size: 1.05rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+    header p, .detail, .note { color: var(--muted); line-height: 1.45; }
+    .kicker { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; }
+    form { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    input, button {
+      font: inherit;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+    }
+    input {
+      flex: 1;
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 0.4rem;
+      padding: 0.55rem 0.7rem;
+    }
+    button, .link-button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 0.45rem 0.8rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    button:hover, .link-button:hover { border-color: var(--ink); }
+    button[aria-pressed="true"] {
+      background: var(--ink);
+      color: white;
+      border-color: var(--ink);
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.8rem;
+      padding: 1rem 1rem 0.4rem;
+      margin-top: 1rem;
+    }
+    .signals, .timeline, .event-list { list-style: none; margin: 0; padding: 0; }
+    .signals li, .timeline li, .event-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.7rem 0;
+      border-top: 1px solid var(--line);
+      font-size: 0.95rem;
+    }
+    .reading { font-variant-numeric: tabular-nums; }
+    .change { color: var(--accent); }
+    .steady { color: var(--steady); }
+    .labels { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.5rem 0 1rem; }
+    pre {
+      white-space: pre-wrap;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .marked { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">EVYZ</p>
+      <h1 id="title">Today</h1>
+      <p id="source">Loading the history…</p>
+      <form id="person">
+        <input id="user" name="user" aria-label="History id" value="user_131">
+        <button type="submit">Load</button>
+      </form>
+    </header>
+    <section id="status" hidden>
+      <p id="headline"></p>
+      <p class="detail" id="detail"></p>
+      <ul class="signals" id="signals"></ul>
+    </section>
+    <section id="event" hidden>
+      <h2>Event</h2>
+      <p class="detail" id="event-meta"></p>
+      <ul class="signals" id="changes"></ul>
+      <pre id="explanation"></pre>
+    </section>
+    <section id="days" hidden>
+      <h2>Recent days</h2>
+      <ul class="timeline" id="timeline"></ul>
+      <h2>Changes on this history</h2>
+      <ul class="event-list" id="events"></ul>
+    </section>
+    <section id="ask" hidden>
+      <h2>What happened around this time?</h2>
+      <div class="labels" id="labels"></div>
+      <p class="note" id="saved"></p>
+    </section>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const userInput = document.querySelector("#user");
+    if (params.get("user")) userInput.value = params.get("user");
+
+    document.querySelector("#person").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const next = new URLSearchParams();
+      next.set("user", userInput.value.trim());
+      location.search = next.toString();
+    });
+
+    load();
+
+    async function load() {
+      const user = userInput.value.trim() || "user_131";
+      const query = new URLSearchParams({ user });
+      if (params.get("event")) query.set("event", params.get("event"));
+      const response = await fetch("/api/status?" + query.toString());
+      const body = await response.json();
+      if (!response.ok) {
+        document.querySelector("#source").textContent = body.detail || "This history could not be loaded.";
+        return;
+      }
+      render(body);
+    }
+
+    function render(status) {
+      document.querySelector("#title").textContent = status.date;
+      document.querySelector("#source").textContent =
+        (status.source || "history") + " · " + status.user_id;
+      document.querySelector("#headline").textContent = status.headline;
+      document.querySelector("#headline").className = status.state === "change" ? "change" : "steady";
+      document.querySelector("#detail").textContent = status.detail || "";
+      document.querySelector("#status").hidden = false;
+      fillSignals(document.querySelector("#signals"), status.signals);
+
+      const event = status.event;
+      document.querySelector("#event").hidden = !event;
+      if (event) {
+        document.querySelector("#event-meta").textContent =
+          event.start_date + " · " + event.duration_days + " days · " + event.status;
+        fillSignals(document.querySelector("#changes"), event.changes);
+        document.querySelector("#explanation").textContent = event.explanation;
+      }
+
+      const days = document.querySelector("#timeline");
+      days.replaceChildren();
+      for (const day of status.timeline) {
+        const item = document.createElement("li");
+        const date = document.createElement("span");
+        date.textContent = day.date + (day.in_event ? " · change" : "");
+        if (day.in_event) date.className = "marked";
+        const reading = document.createElement("span");
+        reading.textContent = day.signals.map((signal) => signal.label + " " + signal.reading).join("  ");
+        item.append(date, reading);
+        days.append(item);
+      }
+      const events = document.querySelector("#events");
+      events.replaceChildren();
+      for (const item of status.events) {
+        const row = document.createElement("li");
+        const link = document.createElement("a");
+        link.className = "link-button";
+        link.href = "?user=" + encodeURIComponent(status.user_id) + "&event=" + encodeURIComponent(item.id);
+        link.textContent = item.start_date;
+        const text = document.createElement("span");
+        text.textContent = item.duration_days + " days · " + item.signals.join(", ");
+        row.append(link, text);
+        events.append(row);
+      }
+      document.querySelector("#days").hidden = status.timeline.length === 0 && status.events.length === 0;
+
+      const ask = document.querySelector("#ask");
+      ask.hidden = !event;
+      const labels = document.querySelector("#labels");
+      labels.replaceChildren();
+      if (event) {
+        for (const label of status.labels) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = label.title;
+          button.setAttribute("aria-pressed", String(status.saved_label === label.id));
+          button.addEventListener("click", () => save(status, label, button));
+          labels.append(button);
+        }
+        document.querySelector("#saved").textContent = status.saved_label
+          ? "Saved."
+          : "The label is stored with this event. It does not change the detection.";
+      }
+    }
+
+    function fillSignals(list, signals) {
+      list.replaceChildren();
+      for (const signal of signals || []) {
+        const item = document.createElement("li");
+        const name = document.createElement("span");
+        name.textContent = signal.label;
+        const reading = document.createElement("span");
+        reading.className = "reading" + (signal.level && signal.level !== "normal" ? " change" : "");
+        reading.textContent = signal.reading;
+        item.append(name, reading);
+        list.append(item);
+      }
+    }
+
+    async function save(status, label, button) {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: status.user_id,
+          event_id: status.event.id,
+          label: label.id,
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        document.querySelector("#saved").textContent = body.detail || "The label was not saved.";
+        return;
+      }
+      for (const other of document.querySelectorAll("#labels button")) {
+        other.setAttribute("aria-pressed", "false");
+      }
+      button.setAttribute("aria-pressed", "true");
+      document.querySelector("#saved").textContent = "Saved: " + label.title + ".";
+    }
+  </script>
+</body>
+</html>
