@@ -443,7 +443,7 @@ Candidate areas to validate first:
 - autoimmune flare monitoring
 - respiratory / home-therapy monitoring
 
-Do not build all three.
+Do not build all three (or four).
 
 Interview clinicians and choose one.
 
@@ -611,7 +611,7 @@ Possible pricing later:
 
 Do not build the company around reimbursement codes before the product is useful.
 
-First prove that a clinic wants the information.
+First prove that a clinic wants the information. Then, once a pilot clinic is live, the product must help the clinic collect: track transmission days per patient per month, log clinician review time, and export a billing report the biller can use. Verify current CMS thresholds before building this. They change by year.
 
 ---
 
@@ -832,7 +832,7 @@ The answer should determine the first clinical vertical.
 
 # 27. EVYZ in Two Sentences
 
-> **EVYZ helps specialist clinics monitor patients between visits. It uses wearable, home-device, symptom, and treatment data to show which patients changed from their own recent pattern and exactly what changed, so the care team can decide who needs review.**
+> **EVYZ flags patients getting worse between visits.** It builds a personal baseline for each patient from the wearables they already own, and gives the care team a short daily review queue of patients who changed. No alert fatigue, no waiting for the next appointment.
 
 ---
 
@@ -840,7 +840,7 @@ The answer should determine the first clinical vertical.
 
 **What are you building?**
 
-> EVYZ helps specialist clinics monitor patients between visits. It connects to wearable and home-health data, compares each patient with their own recent history, and gives the care team a short list of patients whose measurements changed enough to review.
+> EVYZ flags patients getting worse between visits. It connects to the wearables patients already own, builds a personal baseline for each patient, and gives the care team a short daily review queue: which patients changed, what changed, and why.
 
 **What does the product do today?**
 
@@ -852,7 +852,7 @@ The answer should determine the first clinical vertical.
 
 **Why not diagnose the patient automatically?**
 
-> The first product does not need to. It needs to reliably show the clinician what changed, when it changed, how long it lasted, and the source measurements behind the event.
+> The first product does not need to. It needs to reliably show what changed, when it changed, how long it lasted, and the measurements behind the event. The clinician interprets; EVYZ shows evidence.
 
 **Why not build hardware now?**
 
