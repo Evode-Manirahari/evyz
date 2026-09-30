@@ -443,6 +443,8 @@ Candidate areas to validate first:
 - autoimmune flare monitoring
 - respiratory / home-therapy monitoring
 
+**Leading hypothesis: cardiology.** Cardiac patients generate exactly the signals wearables measure best (resting heart rate, HRV, activity), and the founder’s ML research background is in cardiovascular disease, the credibility that opens doors to cardiologists. Validate it against the other candidates with real interviews. If the interviews point elsewhere, follow the interviews.
+
 Do not build all three (or four).
 
 Interview clinicians and choose one.
@@ -608,6 +610,8 @@ Possible pricing later:
 - per monitored patient per month
 - per treatment episode
 - annual clinic contract
+
+The pricing works because remote monitoring is reimbursable: Medicare’s RPM codes let clinics bill for monitoring patients between visits. That is a tailwind, not the product. It makes EVYZ a revenue line for the clinic rather than a cost center, which is why per-patient-per-month pricing is viable.
 
 Do not build the company around reimbursement codes before the product is useful.
 
@@ -845,6 +849,14 @@ The answer should determine the first clinical vertical.
 **What does the product do today?**
 
 > The current system takes a longitudinal wearable history, builds a 28-day baseline for each person, finds sustained single- and multi-signal changes, groups them into events, and explains which measurements moved and by how much.
+
+**Why won’t clinicians ignore this like every other RPM alert?**
+
+> Existing tools compare patients to population averages, so they cry wolf and doctors tune them out. EVYZ compares each patient to themselves. A resting heart rate of 69 is normal for most people, a red flag for the patient whose baseline is 58-62.
+
+**Who pays?**
+
+> Specialist clinics, per monitored patient per month. Remote monitoring is reimbursable under Medicare’s RPM codes, so EVYZ is a revenue line for the clinic, not a cost center.
 
 **Why is this not WHOOP, Oura, or Fitbit?**
 
